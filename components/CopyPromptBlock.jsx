@@ -1,5 +1,5 @@
 export const COURSE_PROMPT =
-  "Install the FSPM CLI from fullstackpm.com/cli and get claude-code-for-everyone, then tell me how to begin."
+  'Help me install fullstackpm.com/cli and start Claude Code for Everyone'
 
 export default function CopyPromptBlock({ prompt = COURSE_PROMPT }) {
   return (
