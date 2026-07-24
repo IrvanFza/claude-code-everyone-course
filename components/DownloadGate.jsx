@@ -28,6 +28,11 @@ const trackEvent = (eventName, params = {}) => {
 
 const EMAIL_SUBMITTED_KEY = 'cc4e-download-email-submitted'
 
+// Legacy safety net: old zip-download links (kept until the release assets
+// are retired — nothing on the site links to these anymore, but old inbound
+// links and cached pages still might).
+const DOWNLOAD_PATTERN = /github\.com\/carlvellotti\/claude-code-everyone-course\/releases\/download\/[^/]+\/[^/]+\.zip/
+
 const copyToClipboard = async (text) => {
   try {
     await navigator.clipboard.writeText(text)
@@ -45,7 +50,9 @@ const copyToClipboard = async (text) => {
 
 export default function DownloadGate() {
   const [isVisible, setIsVisible] = useState(false)
+  const [mode, setMode] = useState('prompt') // 'prompt' | 'download' (legacy zip net)
   const [pendingPrompt, setPendingPrompt] = useState(null)
+  const [pendingUrl, setPendingUrl] = useState(null)
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState('idle')
   const [errorMessage, setErrorMessage] = useState('')
@@ -53,34 +60,64 @@ export default function DownloadGate() {
 
   useEffect(() => {
     const handleClick = (e) => {
-      const target = e.target.closest ? e.target.closest('[data-copy-prompt]') : null
-      if (!target) return
+      // Primary: the copy-the-prompt button (CopyPromptBlock)
+      const promptTarget = e.target.closest ? e.target.closest('[data-copy-prompt]') : null
+      if (promptTarget) {
+        const prompt = promptTarget.getAttribute('data-copy-prompt')
+        if (!prompt) return
 
-      const prompt = target.getAttribute('data-copy-prompt')
-      if (!prompt) return
+        e.preventDefault()
+
+        const emailAlreadySubmitted = localStorage.getItem(EMAIL_SUBMITTED_KEY)
+
+        trackEvent('copy_prompt_click', { page: window.location.pathname })
+
+        if (emailAlreadySubmitted) {
+          copyToClipboard(prompt)
+          trackEvent('prompt_copied', { page: window.location.pathname })
+          setMode('prompt')
+          setPendingPrompt(prompt)
+          setStatus('success')
+          setIsVisible(true)
+          setTimeout(() => setIsVisible(false), 2000)
+          return
+        }
+
+        setMode('prompt')
+        setPendingPrompt(prompt)
+        setIsVisible(true)
+        setStatus('idle')
+        setEmail('')
+        setErrorMessage('')
+        trackEvent('email_gate_shown', { page: window.location.pathname, gate_type: 'copy_prompt' })
+        return
+      }
+
+      // Legacy safety net: old zip-download anchors
+      const anchor = e.target.closest ? e.target.closest('a') : null
+      if (!anchor) return
+      const href = anchor.getAttribute('href') || ''
+      if (!DOWNLOAD_PATTERN.test(href)) return
 
       e.preventDefault()
 
       const emailAlreadySubmitted = localStorage.getItem(EMAIL_SUBMITTED_KEY)
 
-      trackEvent('copy_prompt_click', { page: window.location.pathname })
+      trackEvent('download_click', { download_url: href })
 
       if (emailAlreadySubmitted) {
-        copyToClipboard(prompt)
-        trackEvent('prompt_copied', { page: window.location.pathname })
-        setPendingPrompt(prompt)
-        setStatus('success')
-        setIsVisible(true)
-        setTimeout(() => setIsVisible(false), 2000)
+        trackEvent('download_started', { download_url: href })
+        window.location.href = href
         return
       }
 
-      setPendingPrompt(prompt)
+      setMode('download')
+      setPendingUrl(href)
       setIsVisible(true)
       setStatus('idle')
       setEmail('')
       setErrorMessage('')
-      trackEvent('email_gate_shown', { page: window.location.pathname })
+      trackEvent('email_gate_shown', { download_url: href, gate_type: 'download' })
     }
 
     document.addEventListener('click', handleClick, true)
@@ -127,11 +164,19 @@ export default function DownloadGate() {
         setStatus('success')
         localStorage.setItem(EMAIL_SUBMITTED_KEY, 'true')
         trackEvent('email_gate_completed', { page: window.location.pathname })
-        trackEvent('prompt_copied', { page: window.location.pathname })
 
-        // Copy the prompt then close modal
-        copyToClipboard(pendingPrompt)
-        setTimeout(() => setIsVisible(false), 2000)
+        if (mode === 'download') {
+          // Legacy net: trigger the zip download then close modal
+          trackEvent('download_started', { download_url: pendingUrl })
+          window.location.href = pendingUrl
+          setTimeout(() => setIsVisible(false), 500)
+        } else {
+          trackEvent('prompt_copied', { page: window.location.pathname })
+
+          // Copy the prompt then close modal
+          copyToClipboard(pendingPrompt)
+          setTimeout(() => setIsVisible(false), 2000)
+        }
       } else {
         setStatus('error')
         setErrorMessage(data.error || 'Something went wrong. Please try again.')
@@ -154,14 +199,20 @@ export default function DownloadGate() {
           <div className="gate-content">
             <div className="gate-success">
               <span className="gate-success-icon">&#10003;</span>
-              <h3>Prompt copied!</h3>
-              <p className="gate-success-sub">Paste it into Claude to begin.</p>
+              {mode === 'download' ? (
+                <h3>Your download is starting!</h3>
+              ) : (
+                <>
+                  <h3>Prompt copied!</h3>
+                  <p className="gate-success-sub">Paste it into Claude to begin.</p>
+                </>
+              )}
             </div>
           </div>
         ) : (
           <div className="gate-content">
             <div className="gate-header">
-              <h2>Enter your email to copy the prompt! (100% free)</h2>
+              <h2>{mode === 'download' ? 'Enter your email for an instant download! (100% free)' : 'Enter your email to copy the prompt! (100% free)'}</h2>
               <p className="gate-subhead">Join a community and newsletter of <strong>30,000+ non-technical people</strong> learning to do amazing things with AI.</p>
             </div>
 
@@ -178,6 +229,8 @@ export default function DownloadGate() {
               <button type="submit" disabled={status === 'loading'}>
                 {status === 'loading' ? (
                   <><Spinner /> Sending...</>
+                ) : mode === 'download' ? (
+                  'Download'
                 ) : (
                   'Copy Prompt'
                 )}
