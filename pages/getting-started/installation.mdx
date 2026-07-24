@@ -1,128 +1,58 @@
 ---
-title: 'Install Claude in 15 Minutes (Desktop App or CLI)'
-description: 'Install Claude for this course: the Claude Desktop app for Mac and Windows, or the Claude Code CLI for the terminal. Written for non-coders.'
-keywords: 'install claude code, claude desktop app, claude code install, claude code download, how to install claude code, claude code install mac, claude code install windows, claude code install linux, claude code setup'
+title: 'Install Claude in 15 Minutes (Desktop App)'
+description: 'Install the Claude Desktop app for this course: download it, sign in, open the Code tab, and paste one prompt. Written for non-coders.'
+keywords: 'install claude, claude desktop app, claude app download, claude code install, how to install claude, claude desktop mac, claude desktop windows, claude code setup'
 ---
+
+import CopyPromptBlock from '../../components/CopyPromptBlock'
 
 ## 0.1: Installation
 
 - **Time to Complete:** 15 minutes
+
+> Prefer the terminal? → [Claude Code CLI guide](/getting-started/claude-code-cli)
 
 ## Prerequisites
 
 - **Claude Pro or Max subscription** (NOT free tier)
   - Sign up at [claude.ai](https://claude.ai) if you don't have one
   - $20/month for Pro
-- Mac (macOS 10.15+), Windows 10+, or Linux (Ubuntu 20.04+)
+- Mac (macOS 10.15+) or Windows 10+
 - 4 GB+ RAM
 - Internet connection
 - **No coding tools required!**
 
-## Install the Claude Desktop App (Recommended)
+**On Linux?** There's no desktop app yet - use the [Claude Code CLI guide](/getting-started/claude-code-cli) instead. Everything in the course works there too.
 
-This course runs in the Claude Desktop app. No terminal needed.
+## Install the Claude Desktop App
 
-1. Download the app from [claude.ai/download](https://claude.ai/download) (Mac or Windows)
-2. Open it and sign in with your Claude account
-3. Click the **Code** tab
+This course runs in the Claude Desktop app.
+
+1. Go to [claude.ai/download](https://claude.ai/download)
+2. **Mac:** download the installer, open it, and drag Claude into your Applications folder
+3. **Windows:** download the installer and run it
+4. Open the app and sign in with your Claude account
+
+## Open the Code Tab
+
+1. In the Claude app, click the **Code** tab
+2. Start a **new project** - Claude will ask where to keep it; anywhere is fine
 
 The Code tab is full Claude Code with a folder picker and buttons instead of commands. If you can see it, you're installed.
 
-**On Linux?** There's no desktop app yet - use the CLI path below. Everything in the course works there too.
+## Paste the Start Prompt
 
-Once the app is installed, go to **[0.2: Get the Course & Start](/getting-started/start-and-clone)**.
+With your new project open, paste this prompt:
 
----
+<CopyPromptBlock />
 
-## Secondary Path: The Claude Code CLI
+## What Happens Next
 
-Prefer working in the terminal? The course works the same in the CLI. Everything below this line is for that path only.
+Claude sets itself up, pulls the course materials into your project, and tells you how to begin. When it's ready, type `/start-1-1` and your first lesson starts.
 
-### How to Open Your Terminal
-
-**Mac:**
-1. Press `Cmd + Space` to open Spotlight
-2. Type "Terminal"
-3. Press Enter
-
-**Windows:**
-1. Press the Windows key
-2. Type "PowerShell"
-3. Press Enter
-
-You'll see a window with a blinking cursor - this is where you type commands.
-
-### Install Claude Code
-
-Copy the command below, paste it into your terminal, and press Enter.
-
-**Mac/Linux:**
-```bash
-curl -fsSL https://claude.ai/install.sh | bash
-```
-
-**Mac with Homebrew:**
-```bash
-brew install --cask claude-code
-```
-
-**Windows PowerShell:**
-```powershell
-irm https://claude.ai/install.ps1 | iex
-```
-
-After running, close and reopen your terminal.
-
-### Verify Installation
-
-```bash
-claude --version
-```
-
-You should see a version number. If you see "command not found", close the terminal, reopen it, and try again.
-
-### Authenticate
-
-1. Type: `claude`
-2. Choose **"Claude account with subscription"** (NOT Anthropic Console)
-3. Complete browser authentication
-4. Select your preferred text style
-5. You should see the Claude Code welcome screen
-
-### Troubleshooting the CLI
-
-#### command not found: claude
-- Close terminal completely and reopen
-- Mac: Run `source ~/.zshrc` or `source ~/.bashrc`
-- Windows: Restart PowerShell
-
-#### Subscription required
-- Verify active subscription at [claude.ai](https://claude.ai)
-- Log out and log back in
-
-#### Permission denied
-- Mac: The install script handles permissions automatically
-- Windows: Run PowerShell as Administrator
-
-#### Run `/doctor` for diagnostics
-Once inside Claude Code, type `/doctor` - it shows what's working and what's not.
-
-#### Still stuck?
-See the full guide: [Claude Code Installation Problems: Fixes for the 8 Most Common Errors](/guides/claude-code-installation-problems) - covers PATH errors, npm vs native installer, Node versions, proxies, and more.
-
-### CLI Command Reference
-
-| Command | Description |
-|---------|-------------|
-| `claude` | Launch Claude Code |
-| `claude --version` | Check Claude Code version |
-| `claude doctor` | Run system diagnostics (from terminal) |
-| `/doctor` | Run health check (inside Claude Code) |
-| `/help` | View available commands (inside Claude Code) |
+That's the whole install. The next page walks through getting the course in more detail.
 
 ---
-
-**Sources:** [Official Claude Code Setup Docs](https://docs.anthropic.com/en/docs/claude-code)
 
 ## What's Next
 
